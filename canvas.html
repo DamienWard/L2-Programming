@@ -1,0 +1,117 @@
+<!doctype html>
+
+<head>
+    <title>Canvas</title>
+</head>
+
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script>
+        var canvas, canvasContext;
+
+        window.onload = function() {
+            canvas = document.getElementById('gameCanvas');
+            canvasContext = canvas.getContext('2d');
+
+            for (var i = 0; i < 25; i++) {
+                bricks.push(randBrick());
+
+            }
+
+            setInterval(mainloop, 1000 / 50);
+        }
+
+        //player variables 
+        var playerXpos = 0;
+        var playerYpos = 0;
+        var playerSize = 20;
+        var playerXspeed = 2;
+        var playerYspeed = 2;
+
+        var bricks = [];
+        var score = 0;
+
+        function mainloop() { //loop runs code 50 times per second
+            colorRect(0, 0, canvas.width, canvas.height, 'black'); //bg
+            colorRect(playerXpos, playerYpos, playerSize, playerSize, 'red'); // player
+
+            playerMove()
+            bricksDraw()
+            bricksMove()
+        }
+
+        function playerMove() {
+            playerXpos += playerXspeed;
+            playerYpos += playerYspeed;
+
+
+            if (playerXpos > canvas.width - playerSize) { //right edge bounce 
+                playerXspeed *= -1;
+            }
+            if (playerXpos < 0) { //left edge bounce 
+                playerXspeed *= -1;
+            }
+            if (playerYpos > canvas.width - playerSize) { //bottom bounce 
+                playerYspeed *= -1;
+            }
+            if (playerYpos < 0) { //top edge bounce 
+                playerYspeed *= -1;
+            }
+        }
+
+        function bricksDraw() {
+            bricks.forEach(function(brick, index, array) {
+                colorRect(brick.brickXpos, brick.brickYpos, brick.brickSize, brick.brickSize, 'white');
+
+            });
+        }
+
+        function bricksMove() {
+            bricks.forEach(function(brick, index, array) {
+                brick.brickXpos += brick.brickXspeed;
+                brick.brickYpos += brick.brickYspeed;
+
+                if (brick.brickXpos > canvas.width - brick.brickSize) { //right edge bounce
+                    brick.brickXspeed *= -1;
+                }
+                if (brick.brickXpos < 0) { //left edge bounce 
+                    brick.brickXspeed *= -1;
+                }
+                if (brick.brickYpos > canvas.height) { //bricks out bottom
+                    brick.brickYpos = 0;
+                    brick.brickSize = Math.floor(Math.random() * (10 - 5) + 5);
+                    score++;
+                    console.log(score);
+                }
+
+
+            });
+        }
+
+        function randBrick() {
+            var brickSize = Math.floor(Math.random() * (50 - 10) + 10);
+            var brickXpos = Math.floor(Math.random() * (canvas.width - brickSize));
+            var brickYpos = Math.floor(Math.random() * (canvas.height - brickSize));
+            var brickXspeed = Math.floor(Math.random() * (15 - 2) + 2);
+            var brickYspeed = Math.floor(Math.random() * (15 - 2) + 2);
+
+            var newBrickObject = {
+                brickSize: brickSize,
+                brickXpos: brickXpos,
+                brickYpos: brickYpos,
+                brickXspeed: brickXspeed,
+                brickYspeed: brickYspeed
+            }
+
+            return newBrickObject;
+        }
+
+        // func to draw coloured rects on canvas
+        function colorRect(x, y, w, h, c) {
+            canvasContext.fillStyle = c;
+            canvasContext.fillRect(x, y, w, h);
+        }
+
+    </script>
+</body>
