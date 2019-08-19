@@ -1,0 +1,41 @@
+<!doctype html>
+
+<head>
+    <title>Road Cross</title>
+</head>
+
+<body>
+    <h1> Road Cross</h1>
+    <canvas id="gameCanvas" width="1500" height="877"></canvas>
+
+    <script>
+        var canvas, canvasContext;
+
+        window.onload = function() {
+            canvas = document.getElementById('gameCanvas');
+            canvasContext = canvas.getContext('2d');
+
+            setInterval(mainloop, 1000 / 50);
+        }
+
+        function mainloop() { // loop runs code 50 times per second 
+            colorRect(0, 0, canvas.width, canvas.height, 'black'); //bg
+        }
+
+        function colorRect(x, y, w, h, c) {
+            canvasContext.fillStyle = c;
+            canvasContext.fillRect(x, y, w, h);
+        }
+
+    
+    </script>
+</body>
+    <style>
+        html {
+            background-color: lightslategray;
+        }
+        h1{
+            color: aquamarine;
+        }
+
+    </style>
