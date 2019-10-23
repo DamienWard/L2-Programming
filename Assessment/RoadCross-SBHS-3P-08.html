@@ -87,6 +87,20 @@
         var playerDheight = 47;
         var playerSxPos = PLAYER_S_WIDTH;
         var playerSyPos = PLAYER_S_HEIGHT * 3;
+        var antiFrameRate = 0.1;
+        
+        var carSxpos = 0;
+        var carSypos = 0;
+        const CAR_S_WIDTH = 1513;
+        const CAR_S_HEIGHT = 750;
+        var carDxpos = 100;
+        var carDypos = 40;
+        var carDwidth = 120;
+        var carDheight = 65;
+        var carXspeed = 5;
+        
+
+        
 
         var playerSpritesheetXY = [];
         var playerImgTotal = 16;
@@ -107,6 +121,16 @@
 
         var playerXYcoordinates = [];
         var playerSpriteImgNum = 0;
+        
+        // player image import/ source
+        var playerImg = new Image();
+        playerImg.src = 'sprites/player.png';
+
+        var bgImage = new Image();
+        bgImage.src = 'background/background.png';
+
+        var car = new Image();
+        car.src = 'sprites/car1.png';
 
         var startingPos = true;
 
@@ -115,9 +139,10 @@
             drawImg(bgImage, 0, 0, 1500, 877, 0, 0, canvas.width, canvas.height);
             drawImg(
                 playerImg, playerSxPos, playerSyPos, PLAYER_S_WIDTH, PLAYER_S_HEIGHT,
-                playerDxPos, playerDyPos, playerDwidth, playerDheight
-
-            );
+                playerDxPos, playerDyPos, playerDwidth, playerDheight);
+                drawImg(car,0, 0, CAR_S_WIDTH, CAR_S_HEIGHT, carDxpos, carDypos, carDwidth, carDheight);
+        
+            
 
             if (startingPos) {
                 startPos();
@@ -125,6 +150,8 @@
             }
 
             playerMove();
+            carMove();
+            
         }
 
         function startPos() {
@@ -132,6 +159,14 @@
             playerDxPos = canvas.width / 2;
             playerDyPos = canvas.height / 1.1;
 
+        }
+        
+        function carMove(){
+            carDxpos += carXspeed;
+            if(carDxpos > canvas.width){
+               carDxpos = startingPos - 100;
+               }
+            
         }
 
         function keyPressed(evt) {
@@ -170,15 +205,17 @@
             playerSxPos = playerSpritesheetXY[playerSpriteImgNum][0];
             playerSyPos = playerSpritesheetXY[playerSpriteImgNum][1];
 
-            if (rightKeyPressed) {
+            if (rightKeyPressed && playerDxPos + PLAYER_S_WIDTH < canvas.width + 10) {
+                playerImgTotal += antiFrameRate;
                 playerDxPos += playerXspeed;
                 playerSpriteImgNum++;
                 if (playerSpriteImgNum < 4 || playerSpriteImgNum > 7) {
                     playerSpriteImgNum = 4;
                 }
+                
             }
-            if (leftKeyPressed) {
-                console.log('left')
+            if (leftKeyPressed && playerDxPos > 0) {
+                playerImgTotal += antiFrameRate;
                 playerDxPos -= playerXspeed;
                 playerSpriteImgNum++;
                 if (playerSpriteImgNum < 8 || playerSpriteImgNum > 11) {
@@ -186,13 +223,15 @@
                 }
             }
             if (upKeyPressed) {
+                playerImgTotal += antiFrameRate;
                 playerDyPos -= playerYspeed;
                 playerSpriteImgNum++;
                 if (playerSpriteImgNum < 12 || playerSpriteImgNum > 15) {
                     playerSpriteImgNum = 12;
                 }
             }
-            if (downKeyPressed) {
+            if (downKeyPressed && playerDyPos + PLAYER_S_HEIGHT < canvas.height) {
+                playerImgTotal += antiFrameRate;
                 playerDyPos += playerYspeed;
                 playerSpriteImgNum++;
                 if (playerSpriteImgNum > 3) {
@@ -213,13 +252,6 @@
             canvasContext.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
         }
 
-
-        // player image import/ source
-        var playerImg = new Image();
-        playerImg.src = 'sprites/player.png';
-
-        var bgImage = new Image();
-        bgImage.src = 'background/background.png';
 
     </script>
 </body>
