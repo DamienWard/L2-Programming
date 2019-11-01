@@ -89,9 +89,8 @@
         var playerSyPos = PLAYER_S_HEIGHT * 3;
         var antiFrameRate = 0.1;
 
-        //score
-        var score = 0;
-        var lives = 3;
+
+        var deaths
 
 
 
@@ -122,15 +121,12 @@
         var bgImage = new Image();
         bgImage.src = 'background/background.png';
 
-        var carImg = new Image();
-        carImg.src = 'sprites/car1.png';
+        var car = new Image();
+        car.src = 'sprites/car1.png';
 
         var startingPos = true;
-        var gameRun = true;
 
         function mainloop() { // loop runs code 50 times per second 
-            if (gameRun){
-            
             //            colorRect(0, 0, canvas.width, canvas.height, 'black'); //bg
             drawImg(bgImage, 0, 0, 1500, 877, 0, 0, canvas.width, canvas.height);
 
@@ -144,23 +140,11 @@
                 startPos();
                 startingPos = false;
             }
-            
-            if (lives < 1){
-                gameRun = false;
-            }
 
             playerMove();
-            carMove();
+            //            carMove();
             carDraw();
 
-            drawText('Score: ' + score, 17, 27, '30px Arial', 'black');
-            drawText('Lives: ' + lives, 480, 27, '30px Arial', 'black');
-            
-        } else {
-            colorRect(0, 0, canvas.width, canvas.height, 'black');
-            drawText('Game over, final score:' + score, canvas.width / 2, canvas.height / 2, 27, '50 px Arial', 'black')
-            
-        }
         }
 
         var totalCars = 6;
@@ -177,25 +161,10 @@
         }
 
         function carMove() {
-            cars.forEach(function(car, i){
-                car.carDxpos += car.carXspeed;
-                if(car.carDxpos > canvas.width){
-                    var carLane = Math.floor(Math.random() * 4) + 1;
-                    car.carDxpos = 0 - car.carDwidth;
-                    car.carDypos = carLane * (car.carDheight * 2.05) ;
-                    if(carLane == 1){
-                       car.carDypos = carLane * (car.carDheight * 1.2) ;
-                    } else {
-                       car.carDypos = carLane * (car.carDheight * 2.05) ; 
-                    }
-                    car.carXspeed = Math.floor(Math.random() * (maxSpeed - minSpeed)) + minSpeed;
-                }
-                if (car.carDypos + car.carDheight > playerDyPos && car.carDypos < playerDyPos + playerDheight && car.carDxpos + car.carDwidth > playerDxPos && car.carDxpos < playerDxPos + playerDwidth) {
-                    playerDyPos = canvas.height - playerDheight;
-                    lives--;
-}
-            })
-                        
+            carDxpos += carXspeed;
+            if (carDxpos > canvas.width) {
+                carDxpos = startingPos - 100;
+            }
 
         }
 
@@ -251,12 +220,6 @@
                 if (playerSpriteImgNum < 8 || playerSpriteImgNum > 11) {
                     playerSpriteImgNum = 8;
                 }
-//                playerSpriteImgNum += antiFrameRate;
-//                playerDyPos -= playerYspeed;
-//                if(playerDyPos <= 0){
-//                   playerDyPos = canvas.height - playerDheight
-//                    score++;
-//                   }
             }
             if (upKeyPressed) {
                 playerImgTotal += antiFrameRate;
@@ -273,13 +236,8 @@
                 if (playerSpriteImgNum > 3) {
                     playerSpriteImgNum = 0;
                 }
-                if(playerDyPos && playerDxPos > canvas.height) {
-                    playerDyPos = startingPos;
-                    playerDxPos = startingPos;
-                }
             }
         }
-    
 
         var cars = [];
 
@@ -293,16 +251,10 @@
             var carSypos = 0;
             const CAR_S_WIDTH = 1513;
             const CAR_S_HEIGHT = 750;
-            var carDwidth = 90;
-            var carDheight = 45;
+            var carDwidth = 120;
+            var carDheight = 65;
             var carDxpos = 0 + carDwidth;
-            var carDypos = 0;
-            
-            if(carLane == 1){
-                       carDypos = carLane * (carDheight * 1.2) ;
-                    } else {
-                       carDypos = carLane * (carDheight * 2.05) ; 
-                    }
+            var carDypos = carLane * (carDheight * 3) ;
             var carXspeed = Math.floor(Math.random() * (maxSpeed - minSpeed)) + minSpeed;
 
             var car = {
@@ -323,12 +275,11 @@
         function carDraw() {
             cars.forEach(function(car, i) {
                 
-//                colorRect(car.carDxpos, car.carDypos, car.carDwidth, car.carDheight, 'red');
-                drawImg(carImg,car.carSxpos,car.carSypos,car.CAR_S_WIDTH, car.CAR_S_HEIGHT, car.carDxpos, car.carDypos, car.carDwidth, car.carDheight); 
+                colorRect(car.carDxpos, car.carDypos, car.CAR_S_WIDTH, car.CAR_S_HEIGHT, 'red');
+                //                drawImg(car,0, 0, 1513, 750, 100, 100, 120, 65); 
 //                (car, 0, 0, car.CAR_S_WIDTH, car.CAR_S_HEIGHT, car.carDxpos, car.carDypos, car.carDwidth, car.carDheight);
             });
         }
-        
 
         function colorRect(x, y, w, h, c) {
             canvasContext.fillStyle = c;
@@ -339,13 +290,10 @@
         function drawImg(img, sx, sy, sw, sh, dx, dy, dw, dh) {
             canvasContext.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
         }
-        
-        function drawText(msg, x, y, f, c) {
-            canvasContext.fillStyle = c;
-            canvasContext.font = f;
-            canvasContext.fillText(msg, x, y);
-        }
-        
 
+        function drawText(msg,x,y,f,c){
+            canvasContext.fillStyle = c;
+            canvasContext.font = f; // '20px Arial'
+        }
     </script>
 </body>
