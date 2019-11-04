@@ -1,0 +1,373 @@
+<!doctype html>
+
+<head>
+    <title>Road Cross</title>
+</head>
+
+<body>
+    <h1> Road Cross</h1>
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+
+    <style>
+        h1 {
+            color: darkmagenta;
+            2 text-align: center;
+        }
+
+
+        html {
+            background-color: black;
+            /*            background-image: url('background/background.png');*/
+        }
+
+        canvas {
+            display: block;
+            margin: auto;
+        }
+
+    </style>
+
+    <script>
+        var canvas, canvasContext;
+
+        window.onload = function() {
+            canvas = document.getElementById('gameCanvas');
+            canvasContext = canvas.getContext('2d');
+
+            document.addEventListener('keydown', keyPressed);
+            document.addEventListener('keyup', keyReleased);
+
+            setInterval(mainloop, 1000 / 50);
+        }
+
+    
+        
+        var username = '';
+        var userNamePass = false;
+        var difficulty = '';
+
+        while (username == false) {
+            username = prompt('What is your name?');
+            if(username != null && username != ''){
+               userNamePass = true;
+            }
+        }
+
+        if (difficulty != 'easy' || difficulty != 'hard') {
+            var pass = false;
+            while (pass == false) {
+                difficulty = prompt('how hard do you want the game?', 'easy');
+                if(difficulty == null){
+                    difficulty = '';
+                }
+                if (difficulty.toLowerCase() == 'easy' || difficulty.toLowerCase() == 'hard') {
+                    pass = true;
+                }
+            }
+        }
+        
+        var maxSpeed = 10;
+        var minSpeed = 4;
+
+
+        // player variables
+        var playerXpos = 0;
+        var playerYpos = 0;
+        var playerSize = 10;
+        var playerXspeed = 5;
+        var playerYspeed = 5;
+
+        if (difficulty == 'easy') {
+            playerYspeed = 10;
+            playerXspeed = 10
+        } else {
+            playerYspeed = 2;
+            playerXspeed = 2;
+        }
+
+//        max 10
+//        min 4
+//        max 15
+//        min 14
+        const LEFT_KEY = 37;
+        const UP_KEY = 38;
+        const RIGHT_KEY = 39;
+        const DOWN_KEY = 40;
+        var leftKeyPressed = false;
+        var upKeyPressed = false;
+        var rightKeyPressed = false;
+        var downKeyPressed = false;
+
+
+        // player spriteSheet variables
+        const PLAYER_S_WIDTH = 37;
+        const PLAYER_S_HEIGHT = 50;
+        var playerDxPos = 0;
+        var playerDyPos = 0;
+        var playerDwidth = 30;
+        var playerDheight = 47;
+        var playerSxPos = PLAYER_S_WIDTH;
+        var playerSyPos = PLAYER_S_HEIGHT * 3;
+        var antiFrameRate = 0.1;
+
+        //score
+        var score = 0;
+        var lives = 3;
+
+
+
+        var playerSpritesheetXY = [];
+        var playerImgTotal = 16;
+        var rowCount = 0
+
+        for (var i = 0; i < playerImgTotal; i++) {
+            playerSpritesheetXY[i] = new Array(2);
+
+            playerSpritesheetXY[i][0] = i % 4 * PLAYER_S_WIDTH;
+
+            if (i % 4 == 0 && i != 0) {
+                rowCount++;
+                playerSpritesheetXY[i][1] = rowCount * PLAYER_S_HEIGHT;
+            } else {
+                playerSpritesheetXY[i][1] = rowCount * PLAYER_S_HEIGHT;
+            }
+        }
+
+        var playerXYcoordinates = [];
+        var playerSpriteImgNum = 0;
+
+        // player image import/ source
+        var playerImg = new Image();
+        playerImg.src = 'sprites/player.png';
+
+        var bgImage = new Image();
+        bgImage.src = 'background/background.png';
+
+        var carImg = new Image();
+        carImg.src = 'sprites/car1.png';
+
+        var startingPos = true;
+        var gameRun = true;
+
+        function mainloop() { // loop runs code 50 times per second 
+            if (gameRun) {
+
+                //            colorRect(0, 0, canvas.width, canvas.height, 'black'); //bg
+                drawImg(bgImage, 0, 0, 1500, 877, 0, 0, canvas.width, canvas.height);
+
+                drawImg(playerImg, playerSxPos, playerSyPos, PLAYER_S_WIDTH, PLAYER_S_HEIGHT,
+                    playerDxPos, playerDyPos, playerDwidth, playerDheight);
+                //                drawImg(car,0, 0, CAR_S_WIDTH, CAR_S_HEIGHT, carDxpos, carDypos, carDwidth, carDheight);
+
+
+
+                if (startingPos) {
+                    startPos();
+                    startingPos = false;
+                }
+
+                if (lives < 1) {
+                    gameRun = false;
+                }
+
+                playerMove();
+                carMove();
+                carDraw();
+
+                drawText('Score: ' + score, 17, 27, '30px Arial', 'black');
+                drawText('Lives: ' + lives, 480, 27, '30px Arial', 'black');
+
+            } else {
+                colorRect(0, 0, canvas.width, canvas.height, 'black');
+                drawText('Game over, ' + username + ' final score: ' + score, canvas.width / 3, canvas.height / 2, '50 px Arial', 'white')
+
+            }
+        } // end mainloop func
+
+        var totalCars = 6;
+
+        function startPos() {
+
+            playerDxPos = canvas.width / 2;
+            playerDyPos = canvas.height / 1.1;
+
+            for (i = 0; i < totalCars; i++) {
+                makeCar();
+            }
+
+        }
+
+        function carMove() {
+            cars.forEach(function(car, i) {
+                car.carDxpos += car.carXspeed;
+                if (car.carDxpos > canvas.width) {
+                    var carLane = Math.floor(Math.random() * 4) + 1;
+                    car.carDxpos = 0 - car.carDwidth;
+                    car.carDypos = carLane * (car.carDheight * 2.05);
+                    if (carLane == 1) {
+                        car.carDypos = carLane * (car.carDheight * 1.2);
+                    } else {
+                        car.carDypos = carLane * (car.carDheight * 2.05);
+                    }
+                    car.carXspeed = Math.floor(Math.random() * (maxSpeed - minSpeed)) + minSpeed;
+                }
+                if (car.carDypos + car.carDheight > playerDyPos && car.carDypos < playerDyPos + playerDheight && car.carDxpos + car.carDwidth > playerDxPos && car.carDxpos < playerDxPos + playerDwidth) {
+                    playerDyPos = canvas.height - playerDheight;
+                    lives--;
+                }
+            })
+
+
+        }
+
+        function keyPressed(evt) {
+            if (evt.keyCode == LEFT_KEY) {
+                leftKeyPressed = true;
+            }
+            if (evt.keyCode == RIGHT_KEY) {
+                rightKeyPressed = true;
+            }
+            if (evt.keyCode == UP_KEY) {
+                upKeyPressed = true;
+                console.log('move it')
+            }
+            if (evt.keyCode == DOWN_KEY) {
+                downKeyPressed = true;
+            }
+        }
+
+        function keyReleased(evt) {
+            if (evt.keyCode == LEFT_KEY) {
+                leftKeyPressed = false;
+            }
+            if (evt.keyCode == RIGHT_KEY) {
+                rightKeyPressed = false;
+            }
+            if (evt.keyCode == UP_KEY) {
+                upKeyPressed = false;
+            }
+            if (evt.keyCode == DOWN_KEY) {
+                downKeyPressed = false;
+            }
+        }
+
+        function playerMove() {
+
+            playerSxPos = playerSpritesheetXY[playerSpriteImgNum][0];
+            playerSyPos = playerSpritesheetXY[playerSpriteImgNum][1];
+
+            if (rightKeyPressed && playerDxPos + PLAYER_S_WIDTH < canvas.width + 10) {
+                playerImgTotal += antiFrameRate;
+                playerDxPos += playerXspeed;
+                playerSpriteImgNum++;
+                if (playerSpriteImgNum < 4 || playerSpriteImgNum > 7) {
+                    playerSpriteImgNum = 4;
+                }
+
+            }
+            if (leftKeyPressed && playerDxPos > 0) {
+                playerImgTotal += antiFrameRate;
+                playerDxPos -= playerXspeed;
+                playerSpriteImgNum++;
+                if (playerSpriteImgNum < 8 || playerSpriteImgNum > 11) {
+                    playerSpriteImgNum = 8;
+                }
+                //                playerSpriteImgNum += antiFrameRate;
+                //                playerDyPos -= playerYspeed;
+                //                if(playerDyPos <= 0){
+                //                   playerDyPos = canvas.height - playerDheight
+                //                    score++;
+                //                   }
+            }
+            if (upKeyPressed) {
+                playerImgTotal += antiFrameRate;
+                playerDyPos -= playerYspeed;
+                playerSpriteImgNum++;
+                if (playerSpriteImgNum < 12 || playerSpriteImgNum > 15) {
+                    playerSpriteImgNum = 12;
+                }
+            }
+            if (downKeyPressed && playerDyPos + PLAYER_S_HEIGHT < canvas.height) {
+                playerImgTotal += antiFrameRate;
+                playerDyPos += playerYspeed;
+                playerSpriteImgNum++;
+                if (playerSpriteImgNum > 3) {
+                    playerSpriteImgNum = 0;
+                }
+            }
+            if (playerDyPos < 0) {
+                playerDyPos = canvas.height - playerDheight / 2;
+                score++;
+            }
+        }
+
+
+        var cars = [];
+
+
+
+        function makeCar() {
+            var carLane = Math.floor(Math.random() * 4) + 1;
+
+            var carSxpos = 0;
+            var carSypos = 0;
+            const CAR_S_WIDTH = 1513;
+            const CAR_S_HEIGHT = 750;
+            var carDwidth = 90;
+            var carDheight = 45;
+            var carDxpos = 0 + carDwidth;
+            var carDypos = 0;
+
+            if (carLane == 1) {
+                carDypos = carLane * (carDheight * 1.2);
+            } else {
+                carDypos = carLane * (carDheight * 2.05);
+            }
+            var carXspeed = Math.floor(Math.random() * (maxSpeed - minSpeed)) + minSpeed;
+
+            var car = {
+                carSxpos: carSxpos,
+                carSypos: carSypos,
+                CAR_S_WIDTH: CAR_S_WIDTH,
+                CAR_S_HEIGHT: CAR_S_HEIGHT,
+                carDxpos: carDxpos,
+                carDypos: carDypos,
+                carDwidth: carDwidth,
+                carDheight: carDheight,
+                carXspeed: carXspeed
+            }
+
+            cars.push(car);
+        }
+
+        function carDraw() {
+            cars.forEach(function(car, i) {
+
+                //                colorRect(car.carDxpos, car.carDypos, car.carDwidth, car.carDheight, 'red');
+                drawImg(carImg, car.carSxpos, car.carSypos, car.CAR_S_WIDTH, car.CAR_S_HEIGHT, car.carDxpos, car.carDypos, car.carDwidth, car.carDheight);
+                //                (car, 0, 0, car.CAR_S_WIDTH, car.CAR_S_HEIGHT, car.carDxpos, car.carDypos, car.carDwidth, car.carDheight);
+            });
+        }
+
+
+        function colorRect(x, y, w, h, c) {
+            canvasContext.fillStyle = c;
+            canvasContext.fillRect(x, y, w, h);
+        }
+
+
+        function drawImg(img, sx, sy, sw, sh, dx, dy, dw, dh) {
+            canvasContext.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+        }
+
+        function drawText(msg, x, y, f, c) {
+            canvasContext.fillStyle = c;
+            canvasContext.font = f;
+            canvasContext.fillText(msg, x, y);
+        }
+
+        
+   </script>
+    <button> <a href='game.html'></a>Play Again</button>
+</body>
